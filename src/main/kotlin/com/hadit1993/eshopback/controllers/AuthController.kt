@@ -69,7 +69,7 @@ class AuthController(
         return ResponseEntity(
             BaseResponse(
                 data = mapOf("accessToken" to token),
-                message = "Activation token sent to your email",
+                message = "You logged in successfully",
                 success = true
             ), HttpStatus.OK
         )

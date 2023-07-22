@@ -15,15 +15,19 @@ import org.springframework.web.multipart.MultipartFile
 
 
 @Service
-class UserService(private val repository: UserRepository, private val passwordEncoder: PasswordEncoder, private val imageUploader: ImageUploader) {
+class UserService(
+    private val repository: UserRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val imageUploader: ImageUploader
+) {
 
     fun createUser(user: RegisterUserDto, profileImage: MultipartFile?): UserEntity {
         val existingUser = repository.findByEmail(user.email!!)
 
-        if (existingUser != null) throw  BadRequestException("This email is already used")
+        if (existingUser != null) throw BadRequestException("This email is already used")
 
         var imageUrl: String? = null
-        if(profileImage != null) {
+        if (profileImage != null) {
             imageUrl = imageUploader.uploadImage(profileImage, ImageType.user)
         }
         return repository.save(

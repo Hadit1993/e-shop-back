@@ -3,6 +3,7 @@ package com.hadit1993.eshopback.security
 
 import com.hadit1993.eshopback.security.jwt.JwtFilter
 import com.hadit1993.eshopback.utils.error.CustomAccessDeniedHandler
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -16,13 +17,17 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 
 @Configuration
 @EnableWebSecurity(debug = true)
 class SecurityConfig(
     private val jwtFilter: JwtFilter,
-    private val userDetailsService: UserDetailsService
+    private val userDetailsService: UserDetailsService,
+    @Value("\${client.baseurl}") private val clientUrl: String
 
 ) {
 
@@ -32,12 +37,15 @@ class SecurityConfig(
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
 
-        http.csrf { csrf ->
+        http.cors { cors ->
+            cors.configurationSource(corsConfigurationSource())
+
+        }.csrf { csrf ->
             csrf.disable()
 
         }.authorizeHttpRequests { authZ ->
             authZ
-                .requestMatchers("/api/register", "/api/login", "/api/activate/**" ,"/images/**").permitAll()
+                .requestMatchers("/api/register", "/api/login", "/api/activate/**", "/images/**").permitAll()
                 .anyRequest()
                 .authenticated()
 
@@ -49,6 +57,20 @@ class SecurityConfig(
 
 
         return http.build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration().apply {
+            allowedOrigins = listOf(clientUrl)
+            allowedMethods = listOf("*")
+            allowedHeaders = listOf("*")
+            allowCredentials = true
+            maxAge = 3600L
+        }
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
     }
 
 
@@ -64,10 +86,11 @@ class SecurityConfig(
 
     @Bean
     fun authenticationProvider(): DaoAuthenticationProvider {
-        val daoAuthenticationProvider = DaoAuthenticationProvider()
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService)
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder())
-        return daoAuthenticationProvider
+        return DaoAuthenticationProvider().apply {
+            setUserDetailsService(userDetailsService)
+            setPasswordEncoder(passwordEncoder())
+        }
+
     }
 
     @Bean

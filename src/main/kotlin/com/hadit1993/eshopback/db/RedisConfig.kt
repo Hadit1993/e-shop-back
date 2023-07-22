@@ -11,7 +11,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 
 
 @Configuration
-class RedisConfig (@Value("\${spring.redis.host}") private val redisHost: String, @Value("\${spring.redis.port}") private val redisPort: String) {
+class RedisConfig(
+    @Value("\${spring.redis.host}") private val redisHost: String,
+    @Value("\${spring.redis.port}") private val redisPort: String
+) {
 
     @Bean
     fun redisConnectionFactory(): LettuceConnectionFactory? {
@@ -21,10 +24,12 @@ class RedisConfig (@Value("\${spring.redis.host}") private val redisHost: String
 
     @Bean
     fun redisTemplate(): RedisTemplate<String, Any> {
-        val redisTemplate = RedisTemplate<String, Any>()
-        redisTemplate.connectionFactory = redisConnectionFactory()
-        redisTemplate.keySerializer = StringRedisSerializer()
-        redisTemplate.valueSerializer = GenericJackson2JsonRedisSerializer()
-        return redisTemplate
+        return RedisTemplate<String, Any>().apply {
+            connectionFactory = redisConnectionFactory()
+            keySerializer = StringRedisSerializer()
+            valueSerializer = GenericJackson2JsonRedisSerializer()
+        }
+
+
     }
 }

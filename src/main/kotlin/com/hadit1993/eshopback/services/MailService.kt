@@ -14,13 +14,15 @@ class MailService(private val mailSender: JavaMailSender, @Value("\${client.base
 
     fun sendActivationUrl(recipient: String, tokenId: String, emailType: EmailType) {
 
-        val subject = if (emailType == EmailType.AccountActivation) "Account Activation" else "Reset password"
+        val messageSubject = if (emailType == EmailType.AccountActivation) "Account Activation" else "Reset password"
         val action = if (emailType == EmailType.AccountActivation) "activate your account" else "reset your password"
         val urlPath = if (emailType == EmailType.AccountActivation) "activation" else "reset-password"
-        val message = SimpleMailMessage()
-        message.setTo(recipient)
-        message.subject = subject
-        message.text = "Please click the following link to $action: ${clientBaseUrl}/${urlPath}/$tokenId"
+        val message = SimpleMailMessage().apply {
+            setTo(recipient)
+            subject = messageSubject
+            text = "Please click the following link to $action: ${clientBaseUrl}/${urlPath}/$tokenId"
+        }
+
         mailSender.send(message)
     }
 }

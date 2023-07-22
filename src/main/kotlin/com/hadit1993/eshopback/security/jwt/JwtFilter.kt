@@ -36,16 +36,22 @@ class JwtFilter(private val jwtService: JwtService, private val userDetailsServi
 
             catch (e: UnAuthorizedException) {
                 val baseResponse = BaseResponse<Unit>(success = false, message =  e.message)
-                response.status = e.statusCode.value()
-                response.writer.print(ObjectMapper().writeValueAsString(baseResponse))
-                response.contentType = "application/json"
+                response.apply {
+                    status = e.statusCode.value()
+                    writer.print(ObjectMapper().writeValueAsString(baseResponse))
+                    contentType = "application/json"
+                }
+
             }
             catch (e: Exception) {
                 SecurityContextHolder.clearContext()
                 val baseResponse = BaseResponse<Unit>(success = false, message =  "Invalid JWT token")
-                response.status = HttpStatus.UNAUTHORIZED.value()
-                response.writer.print(ObjectMapper().writeValueAsString(baseResponse))
-                response.contentType = "application/json"
+                response.apply {
+                    status = HttpStatus.UNAUTHORIZED.value()
+                    writer.print(ObjectMapper().writeValueAsString(baseResponse))
+                    contentType = "application/json"
+                }
+
                 return
             }
         }

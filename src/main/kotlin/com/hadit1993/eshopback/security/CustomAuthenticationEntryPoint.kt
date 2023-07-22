@@ -17,8 +17,11 @@ class CustomAuthenticationEntryPoint: AuthenticationEntryPoint {
     {
 
         val baseResponse = BaseResponse<Unit>(success = false, message =  "missing or invalid authentication credentials")
-        response.status = HttpStatus.UNAUTHORIZED.value()
-        response.writer.print(ObjectMapper().writeValueAsString(baseResponse))
-        response.contentType = "application/json"
+        response.apply {
+            status = HttpStatus.UNAUTHORIZED.value()
+            writer.print(ObjectMapper().writeValueAsString(baseResponse))
+            contentType = "application/json"
+        }
+
     }
 }

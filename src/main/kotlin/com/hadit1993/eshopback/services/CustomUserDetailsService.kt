@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service
 @Service
 class CustomUserDetailsService(val userRepository: UserRepository) : UserDetailsService {
 
-
     override fun loadUserByUsername(email: String): UserDetails {
         val user = userRepository.findByEmail(email)
             ?: throw NotFoundException("No user found with email: $email")
